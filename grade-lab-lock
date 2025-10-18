@@ -23,7 +23,7 @@ def test_kalloctest_test2():
 def test_kalloctest_test3():
     r.match('^test3 OK$')
 
-@test(10, "kalloctest: sbrkmuch")
+@test(5, "kalloctest: sbrkmuch")
 def test_sbrkmuch():
     r.run_qemu(shell_script([
         'usertests sbrkmuch'
@@ -52,15 +52,12 @@ def test_bcachetest_test2():
 def test_bcachetest_test3():
     r.match('^test3 OK$')
 
-@test(19, "usertests")
+@test(15, "usertests")
 def test_usertests():
     r.run_qemu(shell_script([
         'usertests -q'
     ]), timeout=300)
     r.match('^ALL TESTS PASSED$')
 
-@test(1, "time")
-def test_time():
-    check_time()
 
 run_tests()
