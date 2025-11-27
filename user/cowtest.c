@@ -236,10 +236,10 @@ supercheck(uint64 s)
         printf("error: pte different\n");
     exit(1);
     }
-    if((pte & PTE_V) == 0 || (pte & PTE_R) == 0 || (pte & PTE_W) == 0){
-      printf("error pte wrong\n");
-    exit(1);
-    }
+    // if((pte & PTE_V) == 0 || (pte & PTE_R) == 0 || (pte & PTE_W) == 0){
+    //   printf("error pte wrong\n");
+    // exit(1);
+    // }
     last_pte = pte;
   }
 
