@@ -11,12 +11,12 @@ def test_cowtest():
         'cowtest'
     ]), timeout=300)
 
-@test(30, "simple", parent=test_cowtest)
+@test(20, "simple", parent=test_cowtest)
 def test_simple():
     matches = re.findall("^simple: ok$", r.qemu.output, re.M)
     assert_equal(len(matches), 2, "Number of appearances of 'simple: ok'")
 
-@test(30, "three", parent=test_cowtest)
+@test(20, "three", parent=test_cowtest)
 def test_three():
     matches = re.findall("^three: ok$", r.qemu.output, re.M)
     assert_equal(len(matches), 3, "Number of appearances of 'three: ok'")
@@ -28,6 +28,11 @@ def test_file():
 @test(20, "forkfork", parent=test_cowtest)
 def test_forkfork():
     r.match('^forkfork: ok$')
+
+
+@test(20, "superpg", parent=test_cowtest)
+def test_superpg():
+    r.match('^superpg: ok$')
 
 @test(0, "usertests")
 def test_usertests():

@@ -5,6 +5,9 @@
 #include "kernel/types.h"
 #include "kernel/memlayout.h"
 #include "user/user.h"
+#include "kernel/riscv.h"
+
+#define N (8 * (1 << 20))
 
 // allocate more than half of physical memory,
 // then fork. this will fail in the default
@@ -218,6 +221,70 @@ forkforktest()
   printf("ok\n");
 }
 
+void
+supercheck(uint64 s)
+{
+  pte_t last_pte = 0;
+
+  for (uint64 p = s;  p < s + 512 * PGSIZE; p += PGSIZE) {
+    pte_t pte = (pte_t) pgpte((void *) p);
+    if(pte == 0){
+      printf("error: no pte\n");
+    exit(1);
+      }
+    if ((uint64) last_pte != 0 && pte != last_pte) {
+        printf("error: pte different\n");
+    exit(1);
+    }
+    if((pte & PTE_V) == 0 || (pte & PTE_R) == 0 || (pte & PTE_W) == 0){
+      printf("error pte wrong\n");
+    exit(1);
+    }
+    last_pte = pte;
+  }
+
+  for(int i = 0; i < 512; i += PGSIZE){
+    *(int*)(s+i) = i;
+  }
+
+  for(int i = 0; i < 512; i += PGSIZE){
+    if(*(int*)(s+i) != i){
+      printf("error: wrong value\n");
+    exit(1);
+      }
+  }
+}
+void
+superpg_test()
+{
+  int pid;
+  
+  printf("superpg: ");
+  
+  char *end = sbrk(N);
+  if (end == 0 || end == (char*)0xffffffffffffffff){
+    printf("error: sbrk failed\n");
+    exit(1);
+  }
+  
+  uint64 s = SUPERPGROUNDUP((uint64) end);
+  supercheck(s);
+  if((pid = fork()) < 0) {
+    printf("error: fork failed\n");
+    exit(1);
+  } else if(pid == 0) {
+    supercheck(s);
+    exit(0);
+  } else {
+    int status;
+    wait(&status);
+    if (status != 0) {
+      exit(0);
+    }
+  }
+  printf("ok\n");  
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -233,6 +300,8 @@ main(int argc, char *argv[])
   filetest();
 
   forkforktest();
+
+  superpg_test();
 
   printf("ALL COW TESTS PASSED\n");
 

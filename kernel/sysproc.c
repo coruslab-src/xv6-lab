@@ -91,3 +91,18 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_pgpte(void)
+{
+  uint64 va;
+  struct proc *p;  
+
+  p = myproc();
+  argaddr(0, &va);
+  pte_t *pte = walk(p->pagetable, va, 0);
+  if(pte != 0) {
+      return (uint64) *pte;
+  }
+  return 0;
+}
